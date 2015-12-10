@@ -99,6 +99,133 @@ pavl_find_node (const struct pavl_table *tree, const void *item)
   return NULL;
 }
 
+
+void *pavl_insert_in_place(struct pavl_table *tree, void *item, struct pavl_node *parent, int dir, struct pavl_node *child) {
+  struct pavl_node *y;     /* Top node to update balance factor, and parent. */
+  struct pavl_node *p, *q; /* Iterator, and parent. */
+  struct pavl_node *n;     /* Newly inserted node. */
+  struct pavl_node *w;     /* New root of rebalanced subtree. */
+
+  // q       (parent)
+  //  \ <----- insertion point
+  //   p     (child)
+  q = parent;
+  p = child;
+
+  assert (tree != NULL && item != NULL);
+  y = tree->pavl_root;
+  if (p != NULL && p->pavl_balance != 0)
+    y = p;
+
+  n = tree->pavl_alloc->libavl_malloc (tree->pavl_alloc, sizeof *p);
+  if (n == NULL) // memory allocation fail
+    return NULL;
+
+  tree->pavl_count++;
+  n->pavl_link[0] = n->pavl_link[1] = NULL;
+  n->pavl_parent = q;
+  n->pavl_data = item;
+  if (q != NULL)
+    q->pavl_link[dir] = n;
+  else
+    tree->pavl_root = n;
+  n->pavl_balance = 0;
+  if (tree->pavl_root == n)
+    return &n->pavl_data;
+
+  for (p = n; p != y; p = q)
+    {
+      q = p->pavl_parent;
+      dir = q->pavl_link[0] != p;
+      if (dir == 0)
+        q->pavl_balance--;
+      else
+        q->pavl_balance++;
+    }
+
+  if (y->pavl_balance == -2)
+    {
+      struct pavl_node *x = y->pavl_link[0];
+      if (x->pavl_balance == -1)
+        {
+          w = x;
+          y->pavl_link[0] = x->pavl_link[1];
+          x->pavl_link[1] = y;
+          x->pavl_balance = y->pavl_balance = 0;
+          x->pavl_parent = y->pavl_parent;
+          y->pavl_parent = x;
+          if (y->pavl_link[0] != NULL)
+            y->pavl_link[0]->pavl_parent = y;
+        }
+      else
+        {
+          assert (x->pavl_balance == +1);
+          w = x->pavl_link[1];
+          x->pavl_link[1] = w->pavl_link[0];
+          w->pavl_link[0] = x;
+          y->pavl_link[0] = w->pavl_link[1];
+          w->pavl_link[1] = y;
+          if (w->pavl_balance == -1)
+            x->pavl_balance = 0, y->pavl_balance = +1;
+          else if (w->pavl_balance == 0)
+            x->pavl_balance = y->pavl_balance = 0;
+          else /* |w->pavl_balance == +1| */
+            x->pavl_balance = -1, y->pavl_balance = 0;
+          w->pavl_balance = 0;
+          w->pavl_parent = y->pavl_parent;
+          x->pavl_parent = y->pavl_parent = w;
+          if (x->pavl_link[1] != NULL)
+            x->pavl_link[1]->pavl_parent = x;
+          if (y->pavl_link[0] != NULL)
+            y->pavl_link[0]->pavl_parent = y;
+        }
+    }
+  else if (y->pavl_balance == +2)
+    {
+      struct pavl_node *x = y->pavl_link[1];
+      if (x->pavl_balance == +1)
+        {
+          w = x;
+          y->pavl_link[1] = x->pavl_link[0];
+          x->pavl_link[0] = y;
+          x->pavl_balance = y->pavl_balance = 0;
+          x->pavl_parent = y->pavl_parent;
+          y->pavl_parent = x;
+          if (y->pavl_link[1] != NULL)
+            y->pavl_link[1]->pavl_parent = y;
+        }
+      else
+        {
+          assert (x->pavl_balance == -1);
+          w = x->pavl_link[0];
+          x->pavl_link[0] = w->pavl_link[1];
+          w->pavl_link[1] = x;
+          y->pavl_link[1] = w->pavl_link[0];
+          w->pavl_link[0] = y;
+          if (w->pavl_balance == +1)
+            x->pavl_balance = 0, y->pavl_balance = -1;
+          else if (w->pavl_balance == 0)
+            x->pavl_balance = y->pavl_balance = 0;
+          else /* |w->pavl_balance == -1| */
+            x->pavl_balance = +1, y->pavl_balance = 0;
+          w->pavl_balance = 0;
+          w->pavl_parent = y->pavl_parent;
+          x->pavl_parent = y->pavl_parent = w;
+          if (x->pavl_link[0] != NULL)
+            x->pavl_link[0]->pavl_parent = x;
+          if (y->pavl_link[1] != NULL)
+            y->pavl_link[1]->pavl_parent = y;
+        }
+    }
+  else
+    return &n->pavl_data;
+  if (w->pavl_parent != NULL)
+    w->pavl_parent->pavl_link[y != w->pavl_parent->pavl_link[0]] = w;
+  else
+    tree->pavl_root = w;
+
+  return &n->pavl_data;
+}
 /* Inserts |item| into |tree| and returns a pointer to |item|'s address.
    If a duplicate item is found in the tree,
    returns a pointer to the duplicate without inserting |item|.
