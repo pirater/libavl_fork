@@ -76,6 +76,27 @@ pavl_find (const struct pavl_table *tree, const void *item)
   return NULL;
 }
 
+struct pavl_node *
+pavl_find_closest_node (const struct pavl_table *tree, const void *item)
+{
+  const struct pavl_node *p;
+
+  assert (tree != NULL && item != NULL);
+  for (p = tree->pavl_root; p != NULL; )
+    {
+      int cmp = tree->pavl_compare (item, p->pavl_data, tree->pavl_param);
+
+      if (cmp < 0)
+        p = p->pavl_link[0];
+      else if (cmp > 0)
+        p = p->pavl_link[1];
+      else /* |cmp == 0| */
+        return p;
+    }
+
+  return p;
+}
+
 /* Search |tree| for an item matching |item|, and return node if found.
    Otherwise return |NULL|. */
 struct pavl_node *

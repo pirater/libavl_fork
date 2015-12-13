@@ -93,6 +93,7 @@ void *pavl_assert_delete (struct pavl_table *, void *);
 
 struct pavl_node *pavl_probe_node (struct pavl_table *, void *);
 struct pavl_node *pavl_find_node (const struct pavl_table *, const void *);
+struct pavl_node *pavl_find_closest_node (const struct pavl_table *tree, const void *item);
 void *pavl_insert_in_place(struct pavl_table *tree, void *item, struct pavl_node *parent, int dir, struct pavl_node *child);
 
 #define pavl_count(table) ((size_t) (table)->pavl_count)
