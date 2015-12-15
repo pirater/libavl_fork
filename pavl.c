@@ -431,11 +431,11 @@ pavl_probe_node (struct pavl_table *tree, void *item, void (*touch_node)(void *)
 
   for (p = n; p != y; p = q)
     {
-      touch_node(p);
-      touch_node(p->pavl_parent);
+      //touch_node(p);
+      //touch_node(p->pavl_parent);
       q = p->pavl_parent;
-      touch_node(q->pavl_link[0]);
-      touch_node(q->pavl_link[1]);
+      //touch_node(q->pavl_link[0]);
+      //touch_node(q->pavl_link[1]);
       dir = q->pavl_link[0] != p;
       if (dir == 0)
         q->pavl_balance--;
