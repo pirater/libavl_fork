@@ -404,6 +404,7 @@ pavl_probe_node (struct pavl_table *tree, void *item, void (*touch_node)(void *)
   y = tree->pavl_root;
   for (q = NULL, p = tree->pavl_root; p != NULL; q = p, p = p->pavl_link[dir])
     {
+      touch_node(p);
       int cmp = tree->pavl_compare (item, p->pavl_data, tree->pavl_param);
       if (cmp == 0)
         return p;
@@ -431,26 +432,22 @@ pavl_probe_node (struct pavl_table *tree, void *item, void (*touch_node)(void *)
 
   for (p = n; p != y; p = q)
     {
-      touch_node(p);
-      touch_node(p->pavl_parent);
       q = p->pavl_parent;
-      touch_node(q->pavl_link[0]);
-      touch_node(q->pavl_link[1]);
       dir = q->pavl_link[0] != p;
       if (dir == 0)
         q->pavl_balance--;
       else
         q->pavl_balance++;
     }
-
   if (y->pavl_balance == -2)
     {
-      touch_node(y->pavl_link[1]);
-      touch_node(y->pavl_link[0]);
-      touch_node(y);
       struct pavl_node *x = y->pavl_link[0];
-      touch_node(x->pavl_link[1]);
+      touch_node(x);
       touch_node(x->pavl_link[0]);
+      touch_node(x->pavl_link[1]);
+      touch_node(y);
+      touch_node(y->pavl_link[0]);
+      touch_node(y->pavl_link[1]);
       if (x->pavl_balance == -1)
         {
           w = x;
@@ -468,8 +465,6 @@ pavl_probe_node (struct pavl_table *tree, void *item, void (*touch_node)(void *)
           w = x->pavl_link[1];
           touch_node(w->pavl_link[0]);
           touch_node(w->pavl_link[1]);
-          touch_node(x->pavl_link[0]);
-          touch_node(x->pavl_link[1]);
           x->pavl_link[1] = w->pavl_link[0];
           w->pavl_link[0] = x;
           y->pavl_link[0] = w->pavl_link[1];
@@ -491,17 +486,16 @@ pavl_probe_node (struct pavl_table *tree, void *item, void (*touch_node)(void *)
     }
   else if (y->pavl_balance == +2)
     {
-      touch_node(y);
-      touch_node(y->pavl_link[0]);
       struct pavl_node *x = y->pavl_link[1];
+      touch_node(y);
       touch_node(x);
+      touch_node(y->pavl_link[1]);
+      touch_node(y->pavl_link[0]);
       touch_node(x->pavl_link[0]);
       touch_node(x->pavl_link[1]);
       if (x->pavl_balance == +1)
         {
           w = x;
-          touch_node(w->pavl_link[0]);
-          touch_node(w->pavl_link[1]);
           y->pavl_link[1] = x->pavl_link[0];
           x->pavl_link[0] = y;
           x->pavl_balance = y->pavl_balance = 0;
@@ -514,11 +508,8 @@ pavl_probe_node (struct pavl_table *tree, void *item, void (*touch_node)(void *)
         {
           assert (x->pavl_balance == -1);
           w = x->pavl_link[0];
-          touch_node(w);
           touch_node(w->pavl_link[0]);
           touch_node(w->pavl_link[1]);
-          touch_node(y->pavl_link[0]);
-          touch_node(y->pavl_link[1]);
           x->pavl_link[0] = w->pavl_link[1];
           w->pavl_link[1] = x;
           y->pavl_link[1] = w->pavl_link[0];
