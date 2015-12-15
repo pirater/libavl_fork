@@ -404,10 +404,6 @@ pavl_probe_node (struct pavl_table *tree, void *item, void (*touch_node)(void *)
   y = tree->pavl_root;
   for (q = NULL, p = tree->pavl_root; p != NULL; q = p, p = p->pavl_link[dir])
     {
-      touch_node(p);
-      touch_node(p->pavl_parent);
-      touch_node(p->pavl_link[0]);
-      touch_node(p->pavl_link[1]);
       int cmp = tree->pavl_compare (item, p->pavl_data, tree->pavl_param);
       if (cmp == 0)
         return p;
