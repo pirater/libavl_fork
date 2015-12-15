@@ -391,7 +391,7 @@ pavl_probe (struct pavl_table *tree, void *item)
    returns a pointer to the duplicate node without inserting |item|.
    Returns |NULL| in case of memory allocation failure. */
 struct pavl_node *
-pavl_probe_node (struct pavl_table *tree, void *item)
+pavl_probe_node (struct pavl_table *tree, void *item, void (*touch_node)(void *))
 {
   struct pavl_node *y;     /* Top node to update balance factor, and parent. */
   struct pavl_node *p, *q; /* Iterator, and parent. */
@@ -400,6 +400,8 @@ pavl_probe_node (struct pavl_table *tree, void *item)
   int dir;                 /* Direction to descend. */
 
   assert (tree != NULL && item != NULL);
+
+  touch_node(tree->pavl_root);
 
   y = tree->pavl_root;
   for (q = NULL, p = tree->pavl_root; p != NULL; q = p, p = p->pavl_link[dir])
