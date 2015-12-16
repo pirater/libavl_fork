@@ -91,6 +91,7 @@ void *pavl_find (const struct pavl_table *, const void *);
 void pavl_assert_insert (struct pavl_table *, void *);
 void *pavl_assert_delete (struct pavl_table *, void *);
 
+struct pavl_node *pavl_find_lowest_node_greater_than(const struct pavl_table *tree, const void *item);
 struct pavl_node *pavl_probe_node (struct pavl_table *, void *);
 struct pavl_node *pavl_find_node (const struct pavl_table *, const void *);
 struct pavl_node *pavl_find_closest_node (const struct pavl_table *tree, const void *item);
