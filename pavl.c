@@ -77,27 +77,6 @@ pavl_find (const struct pavl_table *tree, const void *item)
 }
 
 struct pavl_node *
-pavl_find_lowest_node_greater_than(const struct pavl_table *tree, const void *item) {
-  assert(tree != NULL && item != NULL);
-  struct pavl_node *node = tree->pavl_root;
-  struct pavl_node *prev_node = NULL;
-  if(node == NULL)
-    return NULL;
-  for(;;) {
-    int cmp = tree->pavl_compare(item, node->pavl_data, tree->pavl_param);
-    if(cmp < 0)
-      node = node->pavl_link[0];
-    else if(cmp > 0)
-      node = node->pavl_link[1];
-    else // cmp == 0
-      return prev_node; // we found something == to our search, return previous
-    if(node == NULL)
-      return prev_node; // search has terminated, return previous node
-    prev_node = node;
-  }
-}
-
-struct pavl_node *
 pavl_find_closest_node (const struct pavl_table *tree, const void *item)
 {
   struct pavl_node *p;
